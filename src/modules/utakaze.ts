@@ -94,20 +94,30 @@ export function utakaze2Ccfolia(chara: UtakazeCharacter): CcfoliaClipboardData {
   });
 
   // パラメータ（シナリオ中に変動しない値）
+  // モデルに格納されている値は「能力値+技能値」のダイスプールのため、純粋な技能値に直す
+  const battle = chara.params.battle - chara.params.courage;
+  const adventure = chara.params.adventure - chara.params.courage;
+  const ride = chara.params.ride - chara.params.courage;
+  const hunt = chara.params.hunt - chara.params.wisdom;
+  const sense = chara.params.sense - chara.params.wisdom;
+  const knowledge = chara.params.knowledge - chara.params.wisdom;
+  const sing = chara.params.sing - chara.params.love;
+  const persuade = chara.params.persuade - chara.params.love;
+  const heart = chara.params.heart - chara.params.love;
   const params = [
     { label: "龍", value: `${chara.status.dragon}` },
     { label: "勇気", value: `${chara.params.courage}` },
-    { label: "戦い", value: `${chara.params.battle}` },
-    { label: "冒険", value: `${chara.params.adventure}` },
-    { label: "騎乗", value: `${chara.params.ride}` },
+    { label: "戦い", value: `${battle}` },
+    { label: "冒険", value: `${adventure}` },
+    { label: "騎乗", value: `${ride}` },
     { label: "知恵", value: `${chara.params.wisdom}` },
-    { label: "狩り", value: `${chara.params.hunt}` },
-    { label: "感覚", value: `${chara.params.sense}` },
-    { label: "学問", value: `${chara.params.knowledge}` },
+    { label: "狩り", value: `${hunt}` },
+    { label: "感覚", value: `${sense}` },
+    { label: "学問", value: `${knowledge}` },
     { label: "愛情", value: `${chara.params.love}` },
-    { label: "歌", value: `${chara.params.sing}` },
-    { label: "説得", value: `${chara.params.persuade}` },
-    { label: "心話", value: `${chara.params.heart}` },
+    { label: "歌", value: `${sing}` },
+    { label: "説得", value: `${persuade}` },
+    { label: "心話", value: `${heart}` },
   ];
 
   return {
