@@ -83,10 +83,7 @@ export default defineComponent({
       state.charaName = state.game = undefined;
       state.hasError = state.isUnsupportedSystem = false;
 
-      jsonp(`https://charasheet.vampire-blood.net/${state.id ?? 0}.js`, {
-        callbackQuery: "callback",
-        callbackName: "myCallback",
-      })
+      jsonp(`https://charasheet.vampire-blood.net/${state.id ?? 0}.js`)
         .then((json: UtakazeResponse) => {
           state.game = json.game;
           switch (json.game) {
