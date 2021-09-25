@@ -23,7 +23,7 @@
           <select id="cc-lower-limit" v-model="state.ccLowerLimit">
             <option value="0">-</option>
             <option
-              v-for="lowerLimit in 10"
+              v-for="lowerLimit in 11"
               :key="`ccll-${lowerLimit}`"
               :value="lowerLimit + 1"
             >
@@ -36,7 +36,7 @@
           <select id="cc-upper-limit" v-model="state.ccUpperLimit">
             <option value="0">-</option>
             <option
-              v-for="upperLimit in 10"
+              v-for="upperLimit in 11"
               :key="`ccul-${upperLimit}`"
               :value="upperLimit + 1"
             >
