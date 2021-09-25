@@ -53,6 +53,8 @@ export interface UtakazeCharacter {
   };
   /** リュックサックの中身 */
   items: { name: string; desc: string }[];
+  /** クリティカルコール適用の値域 */
+  ccLimit: { lower: number; upper: number };
 }
 
 /** キャラクター保管所から取得するデータ */

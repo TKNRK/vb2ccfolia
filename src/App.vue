@@ -16,6 +16,37 @@
       <input v-model="state.id" placeholder="edit me" />
       <button @click="onButtonClicked">クリップボードにコピー</button>
     </div>
+    <div id="utakaze-cc">
+      <p>クリティカルコールを適用するダイスプールの範囲</p>
+      <ul id="cc-settnigs-list">
+        <li id="cc-lower-item">
+          <select id="cc-lower-limit" v-model="state.ccLowerLimit">
+            <option value="0">-</option>
+            <option
+              v-for="lowerLimit in 10"
+              :key="`ccll-${lowerLimit}`"
+              :value="lowerLimit + 1"
+            >
+              {{ lowerLimit + 1 }}
+            </option>
+          </select>
+          以上でクリティカルコールを適用する
+        </li>
+        <li id="cc-upper-item">
+          <select id="cc-upper-limit" v-model="state.ccUpperLimit">
+            <option value="0">-</option>
+            <option
+              v-for="upperLimit in 10"
+              :key="`ccul-${upperLimit}`"
+              :value="upperLimit + 1"
+            >
+              {{ upperLimit + 1 }}
+            </option>
+          </select>
+          以下でクリティカルコールを適用する
+        </li>
+      </ul>
+    </div>
     <div id="result">
       <div v-if="state.hasError">
         <p>
@@ -47,6 +78,10 @@ import { UtakazeResponse } from "@/types/utakaze";
 import { convUtakaze, utakaze2Ccfolia } from "@/modules/utakaze";
 
 interface State {
+  /** クリティカルコールのダイスプール下限値 */
+  ccLowerLimit: number;
+  /** クリティカルコールのダイスプール上限値 */
+  ccUpperLimit: number;
   hasError: boolean;
   isUnsupportedSystem: boolean;
   id?: number;
@@ -58,6 +93,8 @@ export default defineComponent({
   name: "App",
   setup() {
     const state = reactive<State>({
+      ccLowerLimit: 2,
+      ccUpperLimit: 5,
       hasError: false,
       isUnsupportedSystem: false,
     });
@@ -75,6 +112,10 @@ export default defineComponent({
     const _setUtakazeToClipboard = (res: UtakazeResponse) => {
       const convData = convUtakaze(res);
       state.charaName = convData.name;
+      convData.ccLimit = {
+        lower: state.ccLowerLimit,
+        upper: state.ccUpperLimit,
+      };
       const piece = utakaze2Ccfolia(convData);
       _copyToClipboard(JSON.stringify(piece));
     };
