@@ -35,9 +35,9 @@ function createChatParret(chara: UtakazeCharacter): string {
   chatParret.push(`${sing}${chara.equip.instrument}`);
 
   chatParret.push("=== 探索技能判定");
-  let adventure = "({勇気}+{戦い})UK 【勇気+戦い】";
+  let adventure = "({勇気}+{冒険})UK 【勇気+冒険】";
   if (chara.params.adventure < 5) {
-    adventure = "({勇気}+{戦い})UK@{龍} 【CC:勇気+戦い】";
+    adventure = "({勇気}+{冒険})UK@{龍} 【CC:勇気+冒険】";
   }
   chatParret.push(adventure);
   let ride = "({勇気}+{騎乗})UK 【勇気+騎乗】";
