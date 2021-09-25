@@ -17,54 +17,68 @@ function createChatParret(chara: UtakazeCharacter): string {
     "{愛情}UK 【愛情】"
   );
 
-  chatParret.push("=== 戦闘技能判定")
-  let battle = "({勇気}+{戦い})UK 【勇気+戦い】";
-  if (chara.params.battle < 5) {
-    battle = "({勇気}+{戦い})UK@{龍} 【CC:勇気+戦い】";
-  }
-  chatParret.push(`${battle}${chara.equip.melee}`);
-  let hunt = "({知恵}+{狩り})UK 【知恵+狩り】";
-  if (chara.params.hunt < 5) {
-    hunt = "({知恵}+{狩り})UK@{龍} 【CC:知恵+狩り】";
-  }
-  chatParret.push(`${hunt}${chara.equip.ranged}`);
-  let sing = "({愛情}+{歌})UK 【愛情+歌】";
-  if (chara.params.sing < 5) {
-    sing = "({愛情}+{歌})UK@{龍} 【CC:愛情+歌】";
-  }
-  chatParret.push(`${sing}${chara.equip.instrument}`);
+  const needCriticalCall = (dicePool: number) => {
+    // 上限・下限ともに指定がなければクリティカルコールは適用しない
+    if (chara.ccLimit.lower === 0 && chara.ccLimit.upper === 0) {
+      return false;
+    }
+    // 下限のみ未指定ならば、上限値以下のダイスプールで CC を適用
+    if (chara.ccLimit.lower === 0) {
+      return dicePool <= chara.ccLimit.upper;
+    }
+    // 上限のみ未指定ならば、下限値以上の大きいダイスプールで CC を適用
+    if (chara.ccLimit.upper === 0) {
+      return chara.ccLimit.lower <= dicePool;
+    }
+    // 下限値〜上限値を満たすダイスプールで CC を適用
+    return chara.ccLimit.lower <= dicePool && dicePool <= chara.ccLimit.upper;
+  };
 
-  chatParret.push("=== 探索技能判定");
-  let adventure = "({勇気}+{冒険})UK 【勇気+冒険】";
-  if (chara.params.adventure < 5) {
-    adventure = "({勇気}+{冒険})UK@{龍} 【CC:勇気+冒険】";
-  }
-  chatParret.push(adventure);
-  let ride = "({勇気}+{騎乗})UK 【勇気+騎乗】";
-  if (chara.params.ride < 5) {
-    ride = "({勇気}+{騎乗})UK@{龍} 【CC:勇気+騎乗】";
-  }
-  chatParret.push(ride);
-  let sense = "({知恵}+{感覚})UK 【知恵+感覚】";
-  if (chara.params.sense < 5) {
-    sense = "({知恵}+{感覚})UK@{龍} 【CC:知恵+感覚】";
-  }
-  chatParret.push(sense);
-  let knowledge = "({知恵}+{学問})UK 【知恵+学問】";
-  if (chara.params.knowledge < 5) {
-    knowledge = "({知恵}+{学問})UK@{龍} 【CC:知恵+学問】";
-  }
-  chatParret.push(knowledge);
-  let persuade = "({愛情}+{説得})UK 【愛情+説得】";
-  if (chara.params.persuade < 5) {
-    persuade = "({愛情}+{説得})UK@{龍} 【CC:愛情+説得】";
-  }
-  chatParret.push(persuade);
-  let heart = "({愛情}+{心話})UK 【愛情+心話】";
-  if (chara.params.heart < 5) {
-    heart = "({愛情}+{心話})UK@{龍} 【CC:愛情+心話】";
-  }
-  chatParret.push(heart);
+  // 戦闘系の技能値に関するチャットパレット
+  const battle = needCriticalCall(chara.params.battle)
+    ? "({勇気}+{戦い})UK@{龍} 【CC:勇気+戦い】"
+    : "({勇気}+{戦い}) 【勇気+戦い】";
+  const hunt = needCriticalCall(chara.params.hunt)
+    ? "({知恵}+{狩り})UK@{龍} 【CC:知恵+狩り】"
+    : "({知恵}+{狩り})UK 【知恵+狩り】";
+  const sing = needCriticalCall(chara.params.sing)
+    ? "({愛情}+{歌})UK@{龍} 【CC:愛情+歌】"
+    : "({愛情}+{歌})UK 【愛情+歌】";
+  chatParret.push(
+    "=== 戦闘技能判定",
+    `${battle}${chara.equip.melee}`, // 勇気+戦い <近接武器>
+    `${hunt}${chara.equip.ranged}`, // 知恵+狩り <遠隔武器>
+    `${sing}${chara.equip.instrument}` // 愛情+歌 <楽器>
+  );
+
+  // 探索系の技能値に関するチャットパレット
+  const adventure = needCriticalCall(chara.params.adventure)
+    ? "({勇気}+{冒険})UK@{龍} 【CC:勇気+冒険】"
+    : "({勇気}+{冒険})UK 【勇気+冒険】";
+  const ride = needCriticalCall(chara.params.ride)
+    ? "({勇気}+{騎乗})UK@{龍} 【CC:勇気+騎乗】"
+    : "({勇気}+{騎乗})UK 【勇気+騎乗】";
+  const sense = needCriticalCall(chara.params.sense)
+    ? "({知恵}+{感覚})UK@{龍} 【CC:知恵+感覚】"
+    : "({知恵}+{感覚})UK 【知恵+感覚】";
+  const knowledge = needCriticalCall(chara.params.knowledge)
+    ? "({知恵}+{学問})UK@{龍} 【CC:知恵+学問】"
+    : "({知恵}+{学問})UK 【知恵+学問】";
+  const persuade = needCriticalCall(chara.params.persuade)
+    ? "({愛情}+{説得})UK@{龍} 【CC:愛情+説得】"
+    : "({愛情}+{説得})UK 【愛情+説得】";
+  const heart = needCriticalCall(chara.params.heart)
+    ? "({愛情}+{心話})UK@{龍} 【CC:愛情+心話】"
+    : "({愛情}+{心話})UK 【愛情+心話】";
+  chatParret.push(
+    "=== 探索技能判定",
+    adventure, // 勇気+冒険
+    ride, // 勇気+騎乗
+    sense, // 知恵+感覚
+    knowledge, // 知恵+学問
+    persuade, // 愛情+説得
+    heart // 愛情+心話
+  );
 
   return chatParret.join("\n");
 }
@@ -183,5 +197,9 @@ export function convUtakaze(data: UtakazeResponse): UtakazeCharacter {
       instrument: data.tokushu_buki,
     },
     items: items,
+    ccLimit: {
+      lower: 2,
+      upper: 5,
+    },
   };
 }
