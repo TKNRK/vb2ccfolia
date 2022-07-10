@@ -37,7 +37,7 @@ function createChatParret(chara: UtakazeCharacter): string {
   // 戦闘系の技能値に関するチャットパレット
   const battle = needCriticalCall(chara.params.battle)
     ? "({勇気}+{戦い})UK@{龍} 【CC:勇気+戦い】"
-    : "({勇気}+{戦い}) 【勇気+戦い】";
+    : "({勇気}+{戦い})UK 【勇気+戦い】";
   const hunt = needCriticalCall(chara.params.hunt)
     ? "({知恵}+{狩り})UK@{龍} 【CC:知恵+狩り】"
     : "({知恵}+{狩り})UK 【知恵+狩り】";
