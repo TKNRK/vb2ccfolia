@@ -15,11 +15,23 @@
     <div id="input">
       <input v-model="state.id" placeholder="edit me" />
       <button @click="onButtonClicked">クリップボードにコピー</button>
+      （履歴:
+      <select id="pc-history" v-model="state.id">
+        <option value="0">-</option>
+        <option
+          v-for="h in state.history"
+          :key="`history-${h.id}`"
+          :value="h.id"
+        >
+          {{ `${h.name} (システム: ${h.system}, ID: ${h.id})` }}
+        </option>
+      </select>
+      ）
     </div>
     <div id="utakaze-cc">
       <p>クリティカルコールを適用するダイスプールの範囲</p>
       <ul id="cc-settnigs-list">
-        <li id="cc-lower-item">
+        <li id="cc-range">
           <select id="cc-lower-limit" v-model="state.ccLowerLimit">
             <option value="0">-</option>
             <option
@@ -30,9 +42,7 @@
               {{ lowerLimit + 1 }}
             </option>
           </select>
-          以上でクリティカルコールを適用する
-        </li>
-        <li id="cc-upper-item">
+          〜
           <select id="cc-upper-limit" v-model="state.ccUpperLimit">
             <option value="0">-</option>
             <option
@@ -43,7 +53,7 @@
               {{ upperLimit + 1 }}
             </option>
           </select>
-          以下でクリティカルコールを適用する
+          のダイスプールではクリティカルコールを適用する
         </li>
       </ul>
     </div>
@@ -71,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
+import { defineComponent, onMounted, reactive } from "vue";
 // import { getUtakazeChara } from "@/modules/utakaze";
 import { jsonp } from "vue-jsonp";
 import { UtakazeResponse } from "@/types/utakaze";
@@ -84,9 +94,21 @@ interface State {
   ccUpperLimit: number;
   hasError: boolean;
   isUnsupportedSystem: boolean;
+  /** ローカルストレージの履歴 */
+  history: HistoryElement[];
   id?: number;
   game?: string;
   charaName?: string;
+}
+
+/** ローカルストレージのキャラクター取得履歴 */
+interface HistoryElement {
+  /** PC 名 */
+  name: string;
+  /** TRPG のシステム名 */
+  system: string;
+  /** キャラクター保管庫のID */
+  id: number;
 }
 
 export default defineComponent({
@@ -97,7 +119,34 @@ export default defineComponent({
       ccUpperLimit: 5,
       hasError: false,
       isUnsupportedSystem: false,
+      history: [],
     });
+
+    const _getHistory = (): HistoryElement[] => {
+      const vbHistory: HistoryElement[] = JSON.parse(
+        localStorage.getItem("vbHistory") || "[]"
+      );
+      return vbHistory;
+    }
+
+    const _saveValidSetting = (name: string, system: string, id: number) => {
+      // ローカルストレージから履歴を取り出す
+      const vbHistory = _getHistory();
+      // すでに保存済みだったら何もしない
+      for (const v of vbHistory) {
+        if (v.id === id) {
+          return;
+        }
+      }
+      // 新規追加
+      vbHistory.push({
+        name: name,
+        system: system,
+        id: id,
+      });
+      // ローカルストレージを上書き
+      localStorage.setItem("vbHistory", JSON.stringify(vbHistory));
+    }
 
     const _copyToClipboard = (piece: string) => {
       var listerner = (e: ClipboardEvent) => {
@@ -124,7 +173,11 @@ export default defineComponent({
       state.charaName = state.game = undefined;
       state.hasError = state.isUnsupportedSystem = false;
 
-      jsonp(`https://charasheet.vampire-blood.net/${state.id ?? 0}.js`)
+      if (state.id === 0 || state.id === undefined) {
+        return;
+      }
+
+      jsonp(`https://charasheet.vampire-blood.net/${state.id}.js`)
         .then((json: UtakazeResponse) => {
           state.game = json.game;
           switch (json.game) {
@@ -133,13 +186,20 @@ export default defineComponent({
               break;
             default:
               state.isUnsupportedSystem = true;
+              return;
           }
+          if (state.id === 0 || state.id === undefined) return;
+          _saveValidSetting(json.pc_name, json.game, state.id);
         })
         .catch((err) => {
           console.log(err);
           state.hasError = true;
         });
     };
+
+    onMounted(() => {
+      state.history = _getHistory();
+    });
 
     return {
       state,
